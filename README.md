@@ -1,7 +1,29 @@
 # Wegbuch
 
-Absence management (vacation, sick days, approvals, team calendar) for a small company. German UI, German (NRW) rules.
-A prototype for a review at LOX Solutions, Cologne.
+A small absence tool for a team: request vacation, report sick, approve, see who is away.
+German UI, German (NRW) rules. A prototype built for a review at LOX Solutions, Cologne.
+
+<table>
+  <tr>
+    <td width="50%"><img src="docs/screenshots/01-mein-urlaub.png" alt="Mein Urlaub: the balance at a glance"><br><sub><b>Mein Urlaub</b>: the balance at a glance</sub></td>
+    <td width="50%"><img src="docs/screenshots/02-urlaub-beantragen.png" alt="Request vacation with a live day count"><br><sub><b>Request</b>: live count of working days, and who else is away</sub></td>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/03-freigaben.png" alt="Approvals for the team lead"><br><sub><b>Freigaben</b>: the lead decides with one click</sub></td>
+    <td><img src="docs/screenshots/04-teamkalender.png" alt="Team calendar"><br><sub><b>Teamkalender</b>: colleagues only see "abwesend", never the reason</sub></td>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/05-historie.png" alt="History ledger for HR"><br><sub><b>Historie</b> (HR): every number can be explained</sub></td>
+    <td align="center"><img src="docs/screenshots/06-handy-mein-urlaub.png" alt="Phone view" width="150"> <img src="docs/screenshots/07-handy-dialog.png" alt="Phone dialog as a bottom sheet" width="150"><br><sub><b>On a phone</b>: dialogs are bottom sheets</sub></td>
+  </tr>
+</table>
+
+## What it does
+
+- **Employees** see their remaining days, request vacation (working days and public holidays are counted for them), and report sick.
+- **Team leads** approve or reject, and see who else is away. **HR** sees everything, adds and deactivates people, and has the full history.
+- **Sick leave stays private:** only HR sees "krank". Everyone else sees "abwesend".
+- **Live:** when something changes, the pages of the people it concerns update by themselves.
 
 ## Run it
 
@@ -9,55 +31,39 @@ Needs Node 24 (`nvm use`).
 
 ```sh
 bun install
-bun dev                 # http://localhost:5173, demo accounts and demo data are on in dev
-bun run check           # types and Svelte checks
-bun run test            # unit tests
-ORIGIN=http://localhost:3000 bun run build   # production build (set ORIGIN to the public address)
+bun dev          # http://localhost:5173, with demo accounts and demo data
+bun run check    # types and Svelte checks
+bun run test     # unit tests
 ```
 
-The database is one SQLite file (`data/absence.db`, or `DATABASE_PATH`). Delete it and restart to get fresh demo data.
+In demo mode the login page has one-click buttons for Anna (employee), Markus (lead) and Sabine (HR).
+The database is one SQLite file (`data/absence.db`, or `DATABASE_PATH`). Delete it and restart for fresh demo data.
 
 ## How it is built
 
-- **SvelteKit 3**, TypeScript. Remote functions (`*.remote.ts`) for all data and forms, Svelte `await` in components. Both are experimental.
-- **Event log** (`events` table, append only). A balance is always computed from the events, never stored.
-- **`src/core/constants.ts`** every limit and timeout in one file (session lifetimes, login throttle, maximum period, password length). Change them there.
-- **`src/core`** pure rules and decisions, no I/O. **`src/lib/server`** the services around SQLite. Pages only show things.
-- Only dependency besides the framework: `valibot` (shape checks of remote function input).
-- Live updates: the server sends counters of what changed, never data. Each page reloads its own query.
+- **SvelteKit 3**, TypeScript, remote functions for all data and forms. Only runtime dependency: `valibot`.
+- **Append-only event log** in SQLite. A balance is never stored, it is computed from the events. Writes are checked by version and an idempotency key.
+- `src/core` pure rules (no I/O), `src/lib/server` services around SQLite, `src/core/constants.ts` every limit and timeout in one file.
+- Own login (argon2id, hashed session secrets), three roles.
 - `/coming-soon` has preview videos of ideas that are not built. It is not in the navigation on purpose.
 
-## Production notes
+## Deploy
 
-- Needs HTTPS. The session cookie is `Secure` outside dev, so login over plain http will not stay logged in.
-- The first HR account comes from `ADMIN_EMAIL` and `ADMIN_PASSWORD`, only while the database is empty. Demo accounts only exist with `DEMO=1` (never set it on a public site).
-- Keep the `data/` folder across deployments. One process only (live counters are in memory).
+```sh
+bun run deploy            # check, test, build, upload, restart, verify
+bun run deploy status     # what runs, and which commit
+bun run deploy reset      # wipe the demo data now (demo mode re-seeds on start)
+```
+
+Host and address go into `.env.deploy` (git ignores it, `.env.example` shows the format).
+Production needs HTTPS (the session cookie is `Secure`) and builds with `ORIGIN=https://<address>`.
+The first HR account comes from `ADMIN_EMAIL` and `ADMIN_PASSWORD`, and only while the database is empty. Demo accounts only exist with `DEMO=1`, never set it on a real site.
+Keep the `data/` folder across deployments. One process only (the live counters are in memory).
 
 ## Known gaps (a prototype, on purpose)
 
-Security
-- Login throttle counts per email, not per source: anyone can lock a colleague out for 15 minutes.
-- One-time passwords (new person, reset) stay valid until the person changes them. No "must change" flag yet. Invite links would fix it.
-- Session timeouts are lenient (12 h idle, 24 h absolute). OWASP suggests about 30 min idle and 4 to 8 h absolute. Cookie name is `session`, not `__Host-` prefixed (needs HTTPS).
-- No log or alert for session events, no list of active logins, no `Clear-Site-Data` on logout.
-- Only a minimal CSP (`frame-ancestors`). No `{@html}` is used, so XSS risk is low.
-- A deactivated person's already open page keeps receiving the live counters (counts only, no data).
-- Origin check of the remote endpoints against cross-site posts is not tested.
-- No audit trail for HR actions (add, deactivate, password reset): they are not events.
-
-Product
-- Leave expiry: no logic. Under German case law leave only expires after the employer's documented notice. A notice flow is not built.
-- Invite links instead of showing a password, a profile photo, SCIM and SSO are not built.
-- Phone layout: the month title wraps and the names column in the calendar is too wide.
-
-Data
-- Erasing a person's data (DSGVO) is not built. Free-text comments sit inside the events, so they cannot be erased without editing the log. Plan: keep comments in their own table, and anonymise the person's row. Health data (sick leave) is extra sensitive.
-- No backup. Copying the live `.db` file is not safe (WAL). Needs an online backup and a tried restore.
-- No schema version (`PRAGMA user_version`) and no upcasting for changed events.
-- No snapshots: a balance is computed from all events of a person on each request.
-- `node:sqlite` is a release candidate (stability 1.2).
-- One database for everyone. Many customers would mean one file per workspace.
-
-Tooling
-- `remoteFunctions` and Svelte `async` are experimental. Pin versions before the review.
-- Safari: the painted shapes use a clip-path and a plain outline on solid buttons, because the SVG filter showed white seams. Not tested in Safari by us.
+- **Data:** no backup yet, no schema versioning, `node:sqlite` is a release candidate, one database for everyone.
+- **Security:** login throttle is per email, one-time passwords never expire, session timeouts are lenient (12 h idle), no log of HR actions, only a minimal CSP.
+- **Rules:** no leave expiry or carryover (German law needs a documented employer notice), sick days inside a vacation are credited without a certificate, no company calendar (Rosenmontag counts as a working day), no half days.
+- **Product:** no invite links, SSO, SCIM or chat integrations, no DSGVO erasure (comments sit inside events), phone navigation could be a bottom bar.
+- **Tooling:** `remoteFunctions` and Svelte `async` are experimental. Pin versions before relying on it.
