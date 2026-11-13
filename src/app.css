@@ -1,0 +1,393 @@
+/* Skizzenbuch: a notebook page. Caveat only for titles and big numbers, Nunito for everything you read.
+   The roughness sits on the painted shapes behind the words (filter on ::before), never on the letters. */
+
+@font-face {
+	font-family: 'Caveat';
+	src: url('./lib/assets/fonts/caveat-latin.woff2') format('woff2');
+	font-weight: 600 700;
+	font-style: normal;
+	font-display: swap;
+}
+@font-face {
+	font-family: 'Nunito';
+	src: url('./lib/assets/fonts/nunito-latin.woff2') format('woff2');
+	font-weight: 400 800;
+	font-style: normal;
+	font-display: swap;
+}
+
+:root {
+	--paper: #f6f1ea;
+	--sheet: #fffdf9;
+	--line: #c9d8ea;
+	--line-soft: #c9d8ea;
+	--text: #3b2f2a;
+	--muted: #6a5c54;
+	--brown: #5b3a2e;
+	--blue: #2e4a7a;
+	--blue-ink: #1c3157;
+	--sky: #cfe0f1;
+	--action: #c2453b;
+	--green: #3f6b35;
+	--note: #fbe79a;
+	--note-ink: #3f311a;
+	--wait-bg: #f3d58a;
+	--wait-ink: #5e4100;
+	--ok-bg: #cfe6c3;
+	--ok-ink: #2b5226;
+	--no-bg: #f4c4c0;
+	--no-ink: #7e2018;
+	--weekend: #f1ece4;
+	--holiday: #f6ddbe;
+	--sick: #c2453b;
+	--paint: url(#pinsel);
+	--paint-big: url(#aquarell);
+	/* names the components use */
+	--bg: var(--paper);
+	--accent: var(--blue);
+	--accent-soft: var(--sky);
+	--accent-ink: var(--blue-ink);
+	font-family: Nunito, system-ui, -apple-system, 'Segoe UI', sans-serif;
+	font-size: 16px;
+	line-height: 1.5;
+	color: var(--text);
+}
+
+* {
+	box-sizing: border-box;
+}
+body {
+	margin: 0;
+	background: var(--paper);
+}
+h1 {
+	margin: 0;
+	font-family: Caveat, cursive;
+	font-weight: 700;
+	font-size: 58px;
+	line-height: 1;
+	color: var(--brown);
+}
+h2 {
+	margin: 0;
+	font-family: Caveat, cursive;
+	font-weight: 700;
+	font-size: 36px;
+	line-height: 1.1;
+	color: var(--brown);
+}
+h2.label {
+	font-size: 32px;
+	margin-bottom: 8px;
+}
+a {
+	color: var(--blue);
+}
+.muted {
+	color: var(--muted);
+}
+.sr {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+	clip: rect(0 0 0 0);
+}
+
+/* sections sit on the page, no boxes */
+.card {
+	background: transparent;
+	padding: 0;
+}
+
+/* painted pill buttons: the brush shape is ::before, the label stays crisp */
+.btn {
+	position: relative;
+	isolation: isolate;
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	height: 54px;
+	padding: 0 28px;
+	border: 0;
+	border-radius: 30px;
+	background: transparent;
+	color: var(--text);
+	font: inherit;
+	font-weight: 800;
+	text-decoration: none;
+	cursor: pointer;
+}
+.btn::before {
+	content: '';
+	position: absolute;
+	inset: 0;
+	z-index: -1;
+	border: 2px solid var(--text);
+	border-radius: 30px;
+	filter: var(--paint);
+}
+.btn.primary,
+.btn.dark,
+.btn.approve {
+	color: #fff;
+}
+.btn.primary::before {
+	background: var(--action);
+	border: 0;
+}
+.btn.dark::before {
+	background: var(--text);
+	border: 0;
+}
+.btn.approve::before {
+	background: var(--green);
+	border: 0;
+}
+.btn.reject {
+	color: var(--no-ink);
+}
+.btn.reject::before {
+	border-color: var(--action);
+}
+.btn.small {
+	height: 36px;
+	padding: 0 16px;
+	font-size: 14px;
+	font-weight: 700;
+}
+.btn.small::before {
+	border-width: 1.5px;
+	border-radius: 20px;
+}
+.btn:disabled {
+	opacity: 0.45;
+	cursor: not-allowed;
+}
+
+label.field {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	font-weight: 800;
+	font-size: 14px;
+}
+input,
+textarea,
+select {
+	font: inherit;
+	padding: 10px 14px;
+	border: 1.5px solid #cfc3b6;
+	border-radius: 14px;
+	background: #fff;
+	color: var(--text);
+}
+/* Selects look like the underlined fields: no box, no heavy ring, our own small arrow. */
+select {
+	appearance: none;
+	-webkit-appearance: none;
+	border: 0;
+	border-bottom: 2px solid #9db4d1;
+	border-radius: 0;
+	padding: 8px 30px 8px 2px;
+	font-weight: 800;
+	cursor: pointer;
+	background: transparent
+		url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8' fill='none' stroke='%235b3a2e' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1 1.5l5 5 5-5'/%3E%3C/svg%3E")
+		no-repeat right 4px center / 12px 8px;
+}
+select:focus-visible {
+	outline: 2px solid var(--blue);
+	outline-offset: 3px;
+	border-radius: 2px;
+}
+:focus-visible {
+	outline: 2px solid var(--blue);
+	outline-offset: 2px;
+}
+
+/* messages */
+.error {
+	color: var(--no-ink);
+	background: var(--no-bg);
+	padding: 10px 16px;
+	border-radius: 12px;
+	margin: 0;
+	font-weight: 700;
+}
+.note {
+	background: var(--sky);
+	color: var(--blue-ink);
+	padding: 12px 16px;
+	border-radius: 14px;
+}
+.warn {
+	background: var(--note);
+	color: var(--note-ink);
+	padding: 10px 16px;
+	transform: rotate(-0.4deg);
+	box-shadow: 0 6px 14px rgba(59, 47, 42, 0.1);
+	font-weight: 700;
+}
+
+/* lists */
+table {
+	width: 100%;
+	border-collapse: collapse;
+}
+th {
+	text-align: left;
+	font-weight: 800;
+	color: var(--muted);
+	font-size: 13px;
+	padding: 10px 8px;
+	border-bottom: 1.5px solid var(--line);
+}
+td {
+	padding: 14px 8px;
+	border-bottom: 1px solid var(--line-soft);
+	vertical-align: top;
+}
+tr:last-child td {
+	border-bottom: 0;
+}
+.num {
+	text-align: right;
+	font-weight: 800;
+	font-size: 20px;
+}
+
+.page {
+	display: flex;
+	flex-direction: column;
+	gap: 32px;
+	max-width: 1120px;
+}
+.page-head {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-end;
+	justify-content: space-between;
+	gap: 16px 24px;
+}
+.row {
+	display: flex;
+	gap: 12px 16px;
+	flex-wrap: wrap;
+	align-items: center;
+}
+.cols {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 40px;
+	align-items: flex-start;
+}
+.cols > .side {
+	flex: 1 1 280px;
+	display: flex;
+	flex-direction: column;
+	gap: 34px;
+	min-width: 0;
+	padding-top: 10px;
+}
+.cols > .main {
+	flex: 2 1 560px;
+	display: flex;
+	flex-direction: column;
+	gap: 24px;
+	min-width: 0;
+}
+.table-scroll {
+	overflow-x: auto;
+}
+
+/* sticky notes and taped sheets */
+.sticky {
+	position: relative;
+	padding: 30px 24px 22px;
+	box-shadow: 0 10px 20px rgba(59, 47, 42, 0.12);
+}
+.sticky.yellow {
+	background: var(--note);
+	color: var(--note-ink);
+	transform: rotate(-2deg);
+}
+.sticky.white {
+	background: #fff;
+	transform: rotate(1.5deg);
+}
+.sticky::before,
+.sheet-card::before {
+	content: '';
+	position: absolute;
+	top: -12px;
+	left: 24px;
+	width: 84px;
+	height: 24px;
+	background: rgba(184, 112, 122, 0.55);
+	transform: rotate(-3deg);
+}
+.sticky.white::before {
+	background: rgba(127, 179, 106, 0.5);
+}
+.sheet-card {
+	position: relative;
+	background: #fff;
+	padding: 30px 30px 26px;
+	box-shadow: 0 10px 26px rgba(59, 47, 42, 0.11);
+	transform: rotate(-0.4deg);
+}
+.sheet-card::before {
+	left: 40px;
+	width: 96px;
+	background: rgba(157, 180, 209, 0.6);
+}
+.sheet-card:nth-of-type(even) {
+	transform: rotate(0.5deg);
+}
+.sheet-card:nth-of-type(even)::before {
+	left: auto;
+	right: 50px;
+	background: rgba(127, 179, 106, 0.5);
+	transform: rotate(4deg);
+}
+
+@media (max-width: 760px) {
+	h1 {
+		font-size: 44px;
+	}
+}
+
+/* Every browser draws the torn brush shapes. One exception: Safari shows white specks inside SOLID buttons
+   (red, dark, green) with the brush filter. So there the solid buttons skip the filter and get a slightly
+   uneven hand-drawn outline instead. Outline buttons, chips, the hero and the notes keep the torn look.
+   app.html sets data-engine="webkit" for Safari. */
+/* Safari draws very large filtered shapes in tiles, and a thin white seam can show between two tiles.
+   So in Safari the big painted shapes get a hand-torn outline from this fixed clip-path instead of the filter.
+   Other browsers keep the real brush filter (--paint-big). */
+:root {
+	--torn: none;
+}
+[data-engine='webkit'] {
+	--paint-big: none;
+	--torn: polygon(0.0% 3.7px, 2.9% 1.7px, 5.7% 1.6px, 8.6% 2.4px, 11.4% 1.8px, 14.3% 1.5px, 17.1% 1.1px, 20.0% 2.1px, 22.9% 2.9px, 25.7% 4.7px, 28.6% 4.4px, 31.4% 4.5px, 34.3% 3.9px, 37.1% 3.3px, 40.0% 5.1px, 42.9% 4.3px, 45.7% 2.1px, 48.6% 0.7px, 51.4% 0.2px, 54.3% 1.3px, 57.1% 2.9px, 60.0% 2.1px, 62.9% 2.0px, 65.7% 2.7px, 68.6% 3.9px, 71.4% 5.6px, 74.3% 5.1px, 77.1% 4.2px, 80.0% 2.5px, 82.9% 2.6px, 85.7% 2.8px, 88.6% 2.7px, 91.4% 1.2px, 94.3% 0.2px, 97.1% 1.8px, 100.0% 3.6px, calc(100% - 3.9px) 7.7%, calc(100% - 3.4px) 15.4%, calc(100% - 4.2px) 23.1%, calc(100% - 1.3px) 30.8%, calc(100% - 2.2px) 38.5%, calc(100% - 2.4px) 46.2%, calc(100% - 5.4px) 53.8%, calc(100% - 3.8px) 61.5%, calc(100% - 3.8px) 69.2%, calc(100% - 0.0px) 76.9%, calc(100% - 3.1px) 84.6%, calc(100% - 4.0px) 92.3%, calc(100% - 5.4px) 100.0%, 97.1% calc(100% - 2.5px), 94.3% calc(100% - 5.0px), 91.4% calc(100% - 5.0px), 88.6% calc(100% - 5.6px), 85.7% calc(100% - 4.5px), 82.9% calc(100% - 2.4px), 80.0% calc(100% - 1.8px), 77.1% calc(100% - 3.2px), 74.3% calc(100% - 2.3px), 71.4% calc(100% - 2.0px), 68.6% calc(100% - 1.3px), 65.7% calc(100% - 0.6px), 62.9% calc(100% - 2.2px), 60.0% calc(100% - 4.1px), 57.1% calc(100% - 4.0px), 54.3% calc(100% - 4.2px), 51.4% calc(100% - 3.1px), 48.6% calc(100% - 4.6px), 45.7% calc(100% - 4.5px), 42.9% calc(100% - 4.4px), 40.0% calc(100% - 2.9px), 37.1% calc(100% - 0.7px), 34.3% calc(100% - 1.3px), 31.4% calc(100% - 1.1px), 28.6% calc(100% - 1.9px), 25.7% calc(100% - 1.9px), 22.9% calc(100% - 1.2px), 20.0% calc(100% - 2.6px), 17.1% calc(100% - 4.5px), 14.3% calc(100% - 5.1px), 11.4% calc(100% - 4.9px), 8.6% calc(100% - 4.0px), 5.7% calc(100% - 3.6px), 2.9% calc(100% - 3.2px), 0.0% calc(100% - 2.8px), 4.3px 92.3%, 1.5px 84.6%, 2.4px 76.9%, 2.0px 69.2%, 6.0px 61.5%, 3.2px 53.8%, 3.0px 46.2%, 0.6px 38.5%, 3.1px 30.8%, 3.6px 23.1%, 4.7px 15.4%, 1.1px 7.7%);
+}
+
+[data-engine='webkit'] .btn.primary::before,
+[data-engine='webkit'] .btn.dark::before,
+[data-engine='webkit'] .btn.approve::before {
+	filter: none;
+	border-radius: 31px 27px 32px 28px / 29px 32px 26px 31px;
+}
+
+/* underline inputs like the sketchbook forms */
+.line {
+	border: 0;
+	border-bottom: 2px solid #9db4d1;
+	border-radius: 0;
+	background: transparent;
+	padding: 8px 2px;
+}
+textarea.line {
+	resize: vertical;
+}
