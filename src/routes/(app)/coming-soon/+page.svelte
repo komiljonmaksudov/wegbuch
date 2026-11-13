@@ -135,16 +135,8 @@
 		transform: scale(1.06);
 	}
 	dialog {
-		width: min(960px, 94vw);
-		padding: 20px 24px 22px;
-		border: 0;
-		border-radius: 10px;
-		background: var(--sheet);
-		color: var(--text);
-		box-shadow: 0 30px 80px rgba(59, 47, 42, 0.35);
-	}
-	dialog::backdrop {
-		background: rgba(59, 47, 42, 0.6);
+		--dialog-width: 960px;
+		padding-top: 20px;
 	}
 	.head {
 		display: flex;

@@ -194,21 +194,6 @@
 		font-size: 17px;
 	}
 
-	dialog {
-		width: min(480px, 94vw);
-		border: 0;
-		border-radius: 10px;
-		padding: 28px 32px 24px;
-		background: var(--sheet);
-		color: var(--text);
-		box-shadow: 0 30px 80px rgba(59, 47, 42, 0.35);
-	}
-	dialog::backdrop {
-		background: rgba(59, 47, 42, 0.55);
-	}
-	dialog h2 {
-		margin-bottom: 14px;
-	}
 	.stack {
 		display: flex;
 		flex-direction: column;

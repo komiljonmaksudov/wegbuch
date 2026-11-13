@@ -370,21 +370,15 @@
 			align-items: stretch;
 			gap: 0;
 		}
+		/* The links wrap into two compact rows. Nothing is hidden behind a sideways swipe. */
 		nav {
-			flex-wrap: nowrap;
-			overflow-x: auto;
-			margin: 0 -20px;
-			padding: 0 20px 4px;
-			scrollbar-width: none;
-			-webkit-overflow-scrolling: touch;
-		}
-		nav::-webkit-scrollbar {
-			display: none;
+			flex-wrap: wrap;
+			gap: 2px 2px;
 		}
 		nav a {
-			flex: none;
 			white-space: nowrap;
-			padding: 8px 14px;
+			padding: 7px 12px;
+			font-size: 15px;
 		}
 		.who {
 			position: absolute;
